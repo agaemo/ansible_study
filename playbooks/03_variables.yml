@@ -1,0 +1,44 @@
+---
+# ステップ3: 変数・ファクト・条件分岐
+# 実行: ansible-playbook playbooks/03_variables.yml
+#      ansible-playbook playbooks/03_variables.yml -e "app_port=9090"  # 変数上書き
+#
+# 学習ポイント:
+#   - vars でPlaybook内変数を定義
+#   - -e オプションでコマンドライン変数（最優先）
+#   - ansible_facts で収集したシステム情報を参照
+#   - when で条件分岐
+
+- name: 変数とファクトの活用
+  hosts: targets
+  gather_facts: yes
+
+  vars:
+    app_name: "myapp"
+    app_port: 8080
+    app_dir: "/opt/{{ app_name }}"
+
+  tasks:
+    - name: 変数の確認
+      ansible.builtin.debug:
+        msg: "アプリ: {{ app_name }}, ポート: {{ app_port }}, ディレクトリ: {{ app_dir }}"
+
+    - name: ファクトからメモリ情報を表示
+      ansible.builtin.debug:
+        msg: "合計メモリ: {{ ansible_facts['memtotal_mb'] }} MB / 空きメモリ: {{ ansible_facts['memfree_mb'] }} MB"
+
+    - name: アプリディレクトリを作成
+      ansible.builtin.file:
+        path: "{{ app_dir }}"
+        state: directory
+        mode: '0755'
+
+    - name: Debian専用の処理（条件分岐）
+      ansible.builtin.debug:
+        msg: "このノードは {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }} です"
+      when: ansible_facts['distribution'] == "Debian"
+
+    - name: メモリが512MB以上の場合のみ実行
+      ansible.builtin.debug:
+        msg: "十分なメモリがあります（{{ ansible_facts['memtotal_mb'] }} MB）"
+      when: ansible_facts['memtotal_mb'] >= 512

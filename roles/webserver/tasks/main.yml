@@ -1,0 +1,49 @@
+---
+- name: nginxをインストール
+  ansible.builtin.apt:
+    name: nginx
+    state: present
+    update_cache: yes
+
+- name: ドキュメントルートを作成
+  ansible.builtin.file:
+    path: "{{ document_root }}"
+    state: directory
+    owner: www-data
+    group: www-data
+    mode: '0755'
+
+- name: インデックスページをテンプレートから展開
+  ansible.builtin.template:
+    src: index.html.j2
+    dest: "{{ document_root }}/index.html"
+    owner: www-data
+    group: www-data
+    mode: '0644'
+  notify: nginx を再起動
+
+- name: nginx仮想ホスト設定を展開
+  ansible.builtin.template:
+    src: nginx.conf.j2
+    dest: "/etc/nginx/sites-available/{{ app_name }}"
+    mode: '0644'
+  notify: nginx を再起動
+
+- name: デフォルトサイトを無効化
+  ansible.builtin.file:
+    path: /etc/nginx/sites-enabled/default
+    state: absent
+  notify: nginx を再起動
+
+- name: サイトを有効化
+  ansible.builtin.file:
+    src: "/etc/nginx/sites-available/{{ app_name }}"
+    dest: "/etc/nginx/sites-enabled/{{ app_name }}"
+    state: link
+  notify: nginx を再起動
+
+- name: nginxを起動・自動起動設定
+  ansible.builtin.service:
+    name: nginx
+    state: started
+    enabled: yes

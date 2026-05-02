@@ -1,0 +1,6 @@
+---
+# デフォルト変数（最も優先度が低い。上書き可能）
+app_name: "myapp"
+app_port: 80
+server_name: "localhost"
+document_root: "/var/www/{{ app_name }}"

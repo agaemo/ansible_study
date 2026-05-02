@@ -1,0 +1,35 @@
+---
+# ステップ2: パッケージ管理
+# 実行: ansible-playbook playbooks/02_packages.yml
+#
+# 学習ポイント:
+#   - apt モジュールでパッケージのインストール・削除
+#   - state: present/absent/latest の違い
+#   - apt の name: にリストを渡すことで複数パッケージを一括処理
+
+- name: パッケージ管理
+  hosts: targets
+  gather_facts: no
+
+  tasks:
+    - name: aptキャッシュを更新
+      ansible.builtin.apt:
+        update_cache: yes
+        cache_valid_time: 3600
+
+    - name: 複数パッケージをインストール
+      ansible.builtin.apt:
+        name:
+          - curl
+          - vim
+          - tree
+        state: present
+
+    - name: curlのバージョンを確認
+      ansible.builtin.command: curl --version
+      register: curl_result
+      changed_when: false
+
+    - name: バージョン情報を表示
+      ansible.builtin.debug:
+        msg: "{{ curl_result.stdout_lines[0] }}"

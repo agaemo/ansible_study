@@ -1,0 +1,14 @@
+---
+# ステップ5: ロール（Role）の活用
+# 実行: ansible-playbook playbooks/05_roles.yml
+#
+# 学習ポイント:
+#   - roles/ ディレクトリに処理をまとめて再利用可能にする
+#   - Role の標準ディレクトリ構成（tasks/handlers/templates/vars/defaults）
+#   - webservers グループのみに適用
+
+- name: Webサーバーのセットアップ（ロール使用）
+  hosts: webservers
+  gather_facts: yes
+  roles:
+    - webserver

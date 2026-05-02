@@ -1,0 +1,32 @@
+services:
+  control:
+    build: ./docker/control
+    container_name: ansible-control
+    volumes:
+      - .:/ansible
+    working_dir: /ansible
+    stdin_open: true
+    tty: true
+    networks:
+      - ansible-net
+    depends_on:
+      - target1
+      - target2
+
+  target1:
+    build: ./docker/target
+    container_name: ansible-target1
+    hostname: target1
+    networks:
+      - ansible-net
+
+  target2:
+    build: ./docker/target
+    container_name: ansible-target2
+    hostname: target2
+    networks:
+      - ansible-net
+
+networks:
+  ansible-net:
+    driver: bridge

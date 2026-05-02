@@ -1,0 +1,23 @@
+---
+# ステップ1: 疎通確認
+# 実行: ansible-playbook playbooks/01_ping.yml
+#
+# 学習ポイント:
+#   - pingモジュールはSSH接続 + Pythonが動くかを確認する
+#   - hosts: all で全ホストを対象にできる
+#   - gather_facts: yes でターゲットのシステム情報を収集する
+#   - ファクト変数は ansible_facts["key"] 形式が推奨（ansible_key 形式は将来廃止予定）
+#   - ansible_default_ipv4 はデフォルトゲートウェイがない環境で未定義になるため
+#     ansible_facts['all_ipv4_addresses'] で全IPを取得する
+
+- name: 疎通確認
+  hosts: all
+  gather_facts: yes
+
+  tasks:
+    - name: pingで接続確認
+      ansible.builtin.ping:
+
+    - name: ターゲットのOSとIPアドレスを表示
+      ansible.builtin.debug:
+        msg: "{{ inventory_hostname }} / OS: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }} / IP: {{ ansible_facts['all_ipv4_addresses'] | first | default('N/A') }}"

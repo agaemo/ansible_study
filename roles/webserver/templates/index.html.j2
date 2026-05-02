@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>{{ app_name }}</title>
+</head>
+<body>
+  <h1>{{ app_name }} が動いています</h1>
+  <ul>
+    <li>ホスト名: {{ inventory_hostname }}</li>
+    <li>OS: {{ ansible_facts['distribution'] }} {{ ansible_facts['distribution_version'] }}</li>
+    <li>IP: {{ ansible_facts['all_ipv4_addresses'] | first | default('N/A') }}</li>
+    <li>デプロイ日時: {{ ansible_facts['date_time']['iso8601'] }}</li>
+  </ul>
+</body>
+</html>

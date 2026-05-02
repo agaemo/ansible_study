@@ -1,0 +1,46 @@
+---
+# ステップ4: テンプレート（Jinja2）とハンドラー
+# 実行: ansible-playbook playbooks/04_templates.yml
+#
+# 学習ポイント:
+#   - template モジュールで Jinja2 テンプレートを展開
+#   - notify + handlers でサービス再起動をトリガー
+#   - lineinfile で設定ファイルの特定行を操作
+
+- name: テンプレートとハンドラーの活用
+  hosts: targets
+  gather_facts: yes
+
+  vars:
+    app_name: "myapp"
+    app_port: 8080
+    server_name: "localhost"
+    document_root: "/var/www/myapp"
+    max_connections: 100
+
+  tasks:
+    - name: nginxをインストール
+      ansible.builtin.apt:
+        name: nginx
+        state: present
+        update_cache: yes
+
+    - name: nginx設定ファイルをテンプレートから展開
+      ansible.builtin.template:
+        src: "../roles/webserver/templates/nginx.conf.j2"
+        dest: "/etc/nginx/sites-available/{{ app_name }}"
+        mode: '0644'
+      notify: nginx を再起動
+
+    - name: サイトを有効化
+      ansible.builtin.file:
+        src: "/etc/nginx/sites-available/{{ app_name }}"
+        dest: "/etc/nginx/sites-enabled/{{ app_name }}"
+        state: link
+      notify: nginx を再起動
+
+  handlers:
+    - name: nginx を再起動
+      ansible.builtin.service:
+        name: nginx
+        state: restarted
